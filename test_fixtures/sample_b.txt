@@ -1,0 +1,13 @@
+Báo cáo dự án JA Compare
+Phiên bản: 1.0.1
+Ngày tạo: 2026-08-11
+
+Mục tiêu:
+- So sánh tài liệu Word, Excel, PDF, Text
+- Hiển thị khác biệt song song
+- Hỗ trợ giao diện kính mờ Windows 10/11
+- Hỗ trợ kéo-thả file
+
+Trạng thái: Đã hoàn thành bản đầu tiên
+Người phụ trách: John Alaa
+Ghi chú: Bản nháp đầu tiên.

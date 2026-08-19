@@ -1,0 +1,46 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+build/
+
+# Native OS binaries (C++/Rust compiled cores via FFI)
+lib/modules/native/*.dll
+lib/modules/native/*.so
+lib/modules/native/*.dylib
+
+# Platform build outputs
+windows/flutter/ephemeral/
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+
+# Release packaging output
+dist/
+dist_pack/
+.Release.lnk
+
+# Logs and temporary files
+logs/
+*.log
+assets/temp/*
+!assets/temp/.gitkeep
+
+# Ignore docs folder contents, EXCEPT docs/screenshots/ (for README images)
+docs/*
+!docs/
+!docs/screenshots/
+!docs/screenshots/*
+
+# Local IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.claude/
+
+# Generated files
+*.g.dart
+*.freezed.dart
+
+# Personal config and comparison history — user-specific runtime data
+config.json
+history.json
