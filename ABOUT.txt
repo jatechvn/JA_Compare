@@ -2,12 +2,12 @@
                        PROJECT INFORMATION CARD
 ========================================================================
 Project Name : JA Compare
-Version      : 2.0.1
+Version      : 2.0.2
 Tech Stack   : Flutter / Dart (Windows Desktop)
 Managed By   : JA Auto Git
 Website      : https://jatechvn.github.io/
 ------------------------------------------------------------------------
-Description  : Windows-first document and folder comparison tool with
-synchronized diff views, multi-format extraction, comparison history,
-and Markdown/Excel export.
+Description  : A Windows-first document and folder comparison tool with
+synchronized diff views, multi-format extraction, drag-and-drop pairing,
+identical-result feedback, and export.
 ========================================================================

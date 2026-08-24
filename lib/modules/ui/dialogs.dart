@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../modules/build_info.dart';
 import '../constants.dart';
 import '../services/settings_service.dart';
 import 'language_scope.dart';
@@ -374,6 +373,11 @@ class _SettingsDialogState extends State<SettingsDialog>
             context.tr('developed_by'),
             style: TextStyle(color: c.textSecondary, fontSize: 12),
           ),
+          const SizedBox(height: 4),
+          Text(
+            context.tr('license_label'),
+            style: TextStyle(color: c.textSecondary, fontSize: 12),
+          ),
           const SizedBox(height: 6),
           InkWell(
             onTap: () => launchUrl(Uri.parse(appWebsite)),
@@ -412,25 +416,6 @@ class _SettingsDialogState extends State<SettingsDialog>
               ],
             ),
           ),
-          if (BuildInfo.isDebug) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.amber.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
-              ),
-              child: Text(
-                'DEBUG • v${BuildInfo.version} (${BuildInfo.debugTimestamp})',
-                style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.amber,
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

@@ -233,26 +233,29 @@ class _DiffStatsBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _StatChip(
-            icon: Icons.add_rounded,
-            label: '+${stats.added} ${context.tr('added_suffix')}',
-            color: c.diffAdded,
-            textColor: c.textPrimary,
-          ),
-          const SizedBox(width: 8),
-          _StatChip(
-            icon: Icons.remove_rounded,
-            label: '-${stats.removed} ${context.tr('removed_suffix')}',
-            color: c.diffRemoved,
-            textColor: c.textPrimary,
-          ),
-          const SizedBox(width: 8),
-          _StatChip(
-            icon: Icons.edit_rounded,
-            label: '${stats.modified} ${context.tr('modified_suffix')}',
-            color: c.diffModified,
-            textColor: c.textPrimary,
-          ),
+          if (stats.hasDifferences) ...[
+            _StatChip(
+              icon: Icons.add_rounded,
+              label: '+${stats.added} ${context.tr('added_suffix')}',
+              color: c.diffAdded,
+              textColor: c.textPrimary,
+            ),
+            const SizedBox(width: 8),
+            _StatChip(
+              icon: Icons.remove_rounded,
+              label: '-${stats.removed} ${context.tr('removed_suffix')}',
+              color: c.diffRemoved,
+              textColor: c.textPrimary,
+            ),
+            const SizedBox(width: 8),
+            _StatChip(
+              icon: Icons.edit_rounded,
+              label: '${stats.modified} ${context.tr('modified_suffix')}',
+              color: c.diffModified,
+              textColor: c.textPrimary,
+            ),
+          ] else
+            _IdenticalResultBanner(label: context.tr('identical_result')),
           const SizedBox(width: 16),
 
           // Diff Navigation Controls
@@ -341,6 +344,42 @@ class _DiffStatsBar extends StatelessWidget {
                   onTap: () => onViewModeChanged(_ViewMode.unified),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _IdenticalResultBanner extends StatelessWidget {
+  final String label;
+
+  const _IdenticalResultBanner({required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
+    final success = Colors.green.shade700;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.green.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(7),
+        border: Border.all(color: success.withValues(alpha: 0.45)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.check_circle_rounded, size: 14, color: success),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: c.textPrimary,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

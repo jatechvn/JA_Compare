@@ -43,9 +43,12 @@ if exist "assets" xcopy /e /i /y /q "assets" "%RELEASE_DIR%\assets\"
 if exist "i18n" xcopy /e /i /y /q "i18n" "%RELEASE_DIR%\i18n\"
 if exist "ABOUT.txt" copy /y "ABOUT.txt" "%RELEASE_DIR%\" >nul
 if exist "README.md" copy /y "README.md" "%RELEASE_DIR%\" >nul
+if exist "CHANGELOG.md" copy /y "CHANGELOG.md" "%RELEASE_DIR%\" >nul
+if exist "RELEASE_NOTES.md" copy /y "RELEASE_NOTES.md" "%RELEASE_DIR%\" >nul
 if exist "LICENSE" copy /y "LICENSE" "%RELEASE_DIR%\" >nul
 
-:: Runtime state belongs in %LOCALAPPDATA%\\JA Compare, never beside the EXE.
+:: Settings and history belong in %LOCALAPPDATA%\\JA Compare. Logs are
+:: intentionally written beside the EXE and the fresh build starts without old logs.
 for %%f in (config.ini config.json history.json) do if exist "%RELEASE_DIR%\%%f" del /q "%RELEASE_DIR%\%%f"
 if exist "%RELEASE_DIR%\logs" powershell -NoProfile -Command "$p='%RELEASE_DIR%\logs'; if (Test-Path -LiteralPath $p) { Remove-Item -LiteralPath $p -Recurse -Force }"
 

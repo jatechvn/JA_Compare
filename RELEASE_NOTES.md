@@ -1,12 +1,14 @@
-TAG=v2.0.1
-TITLE=JA Compare v2.0.1
+TAG=v2.0.2
+TITLE=JA Compare v2.0.2
 BODY=
 ## Highlights
 
-- Folder comparisons are now saved in Comparison history.
-- File and folder history entries are clearly distinguished in the history dialog.
-- Folder history entries can be reopened directly from the history list.
-- Existing file-only history data remains compatible.
+- Real-world Excel files with non-standard styles, duplicate shared strings, and
+  distant style-only rows now parse successfully.
+- Drop two files or two folders anywhere in the app to populate both comparison
+  sides automatically.
+- Identical file comparisons show a clear green confirmation banner.
+- Normal and debug logs are written beside the packaged executable in `logs/`.
 - Updated About, User Guide, README, and Vietnamese documentation.
 
 ## Verification

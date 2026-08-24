@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ja_compare/modules/diff_engine.dart';
 import 'package:ja_compare/modules/logic.dart';
@@ -134,5 +136,58 @@ void main() {
 
       controller.dispose();
     });
+
+    test('loads two dropped files into the file comparison sides', () async {
+      final tempDirectory = await Directory.systemTemp.createTemp(
+        'ja_compare_drop_',
+      );
+      final left = File(
+        '${tempDirectory.path}${Platform.pathSeparator}left.txt',
+      )..writeAsStringSync('left');
+      final right = File(
+        '${tempDirectory.path}${Platform.pathSeparator}right.txt',
+      )..writeAsStringSync('right');
+      final controller = CompareController();
+
+      try {
+        await controller.loadDroppedPair([left.path, right.path]);
+
+        expect(controller.mode, CompareMode.files);
+        expect(controller.leftDocument?.path, left.path);
+        expect(controller.rightDocument?.path, right.path);
+        expect(controller.canCompare, isTrue);
+      } finally {
+        controller.dispose();
+        await tempDirectory.delete(recursive: true);
+      }
+    });
+
+    test(
+      'loads two dropped directories into the folder comparison sides',
+      () async {
+        final tempDirectory = await Directory.systemTemp.createTemp(
+          'ja_compare_drop_dirs_',
+        );
+        final left = await Directory(
+          '${tempDirectory.path}${Platform.pathSeparator}left',
+        ).create();
+        final right = await Directory(
+          '${tempDirectory.path}${Platform.pathSeparator}right',
+        ).create();
+        final controller = CompareController();
+
+        try {
+          await controller.loadDroppedPair([left.path, right.path]);
+
+          expect(controller.mode, CompareMode.folders);
+          expect(controller.leftDirectoryPath, left.path);
+          expect(controller.rightDirectoryPath, right.path);
+          expect(controller.canCompare, isTrue);
+        } finally {
+          controller.dispose();
+          await tempDirectory.delete(recursive: true);
+        }
+      },
+    );
   });
 }

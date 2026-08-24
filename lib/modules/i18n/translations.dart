@@ -88,6 +88,11 @@ const Map<String, Map<AppLanguage, String>> _translations = {
     AppLanguage.vi: 'Giống hệt nhau',
     AppLanguage.zh: '完全相同',
   },
+  'identical_result': {
+    AppLanguage.en: 'Files are identical',
+    AppLanguage.vi: 'Hai tệp giống hệt nhau',
+    AppLanguage.zh: '两个文件完全相同',
+  },
   'settings_title': {
     AppLanguage.en: 'Settings',
     AppLanguage.vi: 'Cài đặt',
@@ -150,48 +155,55 @@ const Map<String, Map<AppLanguage, String>> _translations = {
   },
   'guide_body': {
     AppLanguage.en:
-        '1. Pick or drag-and-drop a document into the left and right panes.\n'
+        '1. Pick files individually, or drop two files / two folders anywhere '
+        'in the app to fill both sides automatically.\n'
         '2. Press "Compare" to see the differences.\n'
-        '3. Added lines are green, removed lines are red, modified lines are amber.\n'
-        '4. Both panes scroll together automatically.\n'
-        '5. Select and copy text directly from either pane, or use the copy '
+        '3. If the files match exactly, the result bar shows "Files are identical".\n'
+        '4. Added lines are green, removed lines are red, modified lines are amber.\n'
+        '5. Both panes scroll together automatically.\n'
+        '6. Select and copy text directly from either pane, or use the copy '
         'icon in a pane\'s header to copy that whole side.\n'
-        '6. Use the share icon to export the result as Markdown (.md) or '
+        '7. Use the share icon to export the result as Markdown (.md) or '
         'Excel (.xlsx) to save or share.\n'
-        '7. Switch to Folders to compare complete directory trees; the result '
+        '8. Switch to Folders to compare complete directory trees; the result '
         'shows added, removed, modified, and similar-name files.\n'
-        '8. The history icon (clock) keeps both file and folder comparisons '
+        '9. The history icon (clock) keeps both file and folder comparisons '
         'so you can reopen a pair instantly.\n'
-        '9. Press "Compare another file" to start over.\n\n'
+        '10. Press "Compare another file" to start over. For diagnostics, run '
+        '`debug.bat`; logs are stored in the app\'s logs folder.\n\n'
         'Supported file formats: .txt .md .csv .json .log .xml .html .yaml '
         '.yml .ini .docx .xlsx .pdf',
     AppLanguage.vi:
-        '1. Chọn hoặc kéo-thả tài liệu bên trái và bên phải.\n'
+        '1. Chọn từng file, hoặc kéo thả 2 file / 2 thư mục vào bất kỳ vị trí nào '
+        'trong phần mềm để tự động điền hai phía.\n'
         '2. Bấm "So sánh" để xem điểm khác biệt.\n'
-        '3. Dòng thêm mới hiển thị màu xanh, xoá hiển thị màu đỏ, '
+        '3. Nếu hai file giống nhau, thanh kết quả hiện "Hai tệp giống hệt nhau".\n'
+        '4. Dòng thêm mới hiển thị màu xanh, xoá hiển thị màu đỏ, '
         'sửa đổi hiển thị màu vàng.\n'
-        '4. Hai khung cuộn đồng bộ với nhau — cuộn một bên, bên kia tự cuộn theo.\n'
-        '5. Có thể bôi đen và sao chép văn bản trực tiếp trong từng khung, '
+        '5. Hai khung cuộn đồng bộ với nhau — cuộn một bên, bên kia tự cuộn theo.\n'
+        '6. Có thể bôi đen và sao chép văn bản trực tiếp trong từng khung, '
         'hoặc bấm biểu tượng sao chép ở góc mỗi khung để sao chép toàn bộ.\n'
-        '6. Bấm biểu tượng chia sẻ để xuất kết quả ra file Markdown (.md) '
+        '7. Bấm biểu tượng chia sẻ để xuất kết quả ra file Markdown (.md) '
         'hoặc Excel (.xlsx) nhằm lưu giữ hoặc chia sẻ.\n'
-        '7. Chuyển sang chế độ Thư mục để so sánh toàn bộ cây thư mục; kết quả '
+        '8. Chuyển sang chế độ Thư mục để so sánh toàn bộ cây thư mục; kết quả '
         'hiển thị file thêm, xoá, sửa đổi và có tên tương tự.\n'
-        '8. Biểu tượng đồng hồ (Lịch sử) lưu cả lần so sánh file và thư mục để '
+        '9. Biểu tượng đồng hồ (Lịch sử) lưu cả lần so sánh file và thư mục để '
         'mở lại nhanh chóng.\n'
-        '9. Bấm "So sánh file khác" để chọn lại tài liệu mới.\n\n'
+        '10. Bấm "So sánh file khác" để chọn lại tài liệu mới. Khi cần chẩn đoán, '
+        'chạy `debug.bat`; log nằm trong thư mục logs cạnh app.\n\n'
         'Định dạng file hỗ trợ: .txt .md .csv .json .log .xml .html .yaml '
         '.yml .ini .docx .xlsx .pdf',
     AppLanguage.zh:
-        '1. 选择或拖放文档到左右两侧面板。\n'
+        '1. 逐个选择文件，或将两个文件 / 两个文件夹拖放到应用任意位置，自动填充两侧。\n'
         '2. 点击"比较"查看差异。\n'
-        '3. 新增的行显示为绿色，删除的显示为红色，修改的显示为黄色。\n'
-        '4. 两侧面板会自动同步滚动。\n'
-        '5. 可直接在任一面板中选择并复制文本，或点击面板顶部的复制图标复制整侧内容。\n'
-        '6. 点击分享图标，将结果导出为 Markdown (.md) 或 Excel (.xlsx) 以保存或分享。\n'
-        '7. 切换到文件夹模式比较完整目录树；结果会显示新增、删除、修改和名称相似的文件。\n'
-        '8. 历史图标（时钟）会保存文件和文件夹比较记录，方便快速重新打开。\n'
-        '9. 点击"比较其他文件"重新开始。\n\n'
+        '3. 如果两个文件完全相同，结果栏会显示"两个文件完全相同"。\n'
+        '4. 新增的行显示为绿色，删除的显示为红色，修改的显示为黄色。\n'
+        '5. 两侧面板会自动同步滚动。\n'
+        '6. 可直接在任一面板中选择并复制文本，或点击面板顶部的复制图标复制整侧内容。\n'
+        '7. 点击分享图标，将结果导出为 Markdown (.md) 或 Excel (.xlsx) 以保存或分享。\n'
+        '8. 切换到文件夹模式比较完整目录树；结果会显示新增、删除、修改和名称相似的文件。\n'
+        '9. 历史图标（时钟）会保存文件和文件夹比较记录，方便快速重新打开。\n'
+        '10. 点击"比较其他文件"重新开始。需要诊断时运行 `debug.bat`，日志位于应用旁的 logs 文件夹。\n\n'
         '支持的文件格式：.txt .md .csv .json .log .xml .html .yaml .yml .ini .docx .xlsx .pdf',
   },
   'version_label': {
@@ -202,16 +214,23 @@ const Map<String, Map<AppLanguage, String>> _translations = {
   'about_description': {
     AppLanguage.en:
         'A Windows-first document and folder comparison tool with synchronized '
-        'diff views, multi-format extraction, comparison history, and export.',
+        'diff views, multi-format extraction, drag-and-drop pairing, identical-result '
+        'feedback, and export.',
     AppLanguage.vi:
         'Công cụ Windows-first để so sánh tài liệu và thư mục, hiển thị khác '
-        'biệt đồng bộ, trích xuất đa định dạng, lưu lịch sử và xuất kết quả.',
-    AppLanguage.zh: 'Windows 优先的文档和文件夹比较工具，提供同步差异视图、多格式提取、比较历史和导出功能。',
+        'biệt đồng bộ, trích xuất đa định dạng, kéo thả nhanh, báo kết quả giống nhau '
+        'và xuất dữ liệu.',
+    AppLanguage.zh: 'Windows 优先的文档和文件夹比较工具，提供同步差异视图、多格式提取、拖放配对、相同结果提示和导出功能。',
   },
   'developed_by': {
     AppLanguage.en: 'Developed by John Alaa / JA Tech',
     AppLanguage.vi: 'Phát triển bởi John Alaa / JA Tech',
     AppLanguage.zh: '由 John Alaa / JA Tech 开发',
+  },
+  'license_label': {
+    AppLanguage.en: 'License: MIT',
+    AppLanguage.vi: 'Giấy phép: MIT',
+    AppLanguage.zh: '许可证：MIT',
   },
   'website_label': {
     AppLanguage.en: 'Website',

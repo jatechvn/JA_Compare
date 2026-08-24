@@ -2,12 +2,11 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
-/// Provides a writable per-user data directory for settings, history and logs.
+/// Provides writable locations for per-user data and application logs.
 ///
-/// Release folders may be installed under a protected location, so runtime
-/// state must never be written beside the executable. On Windows this maps to
-/// `%LOCALAPPDATA%\\JA Compare`; the other branches keep tests and future
-/// platforms usable without adding another storage dependency.
+/// Settings and comparison history are kept outside the release folder. On
+/// Windows this maps to `%LOCALAPPDATA%\\JA Compare`; logs intentionally live
+/// beside the executable so a portable release can be diagnosed in place.
 class AppStorageService {
   AppStorageService._();
 
@@ -30,7 +29,10 @@ class AppStorageService {
   }
 
   static Directory get logsDirectory {
-    ensureInitialized();
+    final executablePath = Platform.resolvedExecutable;
+    if (executablePath.isNotEmpty) {
+      return Directory(p.join(File(executablePath).parent.path, 'logs'));
+    }
     return Directory(p.join(rootDirectory.path, 'logs'));
   }
 

@@ -96,50 +96,59 @@ class _MainWindowState extends State<MainWindow> {
         autofocus: true,
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          body: Stack(
-            children: [
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                  child: const SizedBox.expand(),
+          body: DropTarget(
+            onDragDone: (details) {
+              if (details.files.length >= 2) {
+                _controller.loadDroppedPair(
+                  details.files.map((file) => file.path),
+                );
+              }
+            },
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ui.ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                    child: const SizedBox.expand(),
+                  ),
                 ),
-              ),
-              Positioned.fill(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: c.bgPrimary.withValues(alpha: opacity),
-                    gradient: RadialGradient(
-                      center: const Alignment(0.7, -0.6),
-                      radius: 1.2,
-                      colors: [
-                        gradientAccent,
-                        c.bgPrimary.withValues(alpha: opacity),
-                      ],
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: c.bgPrimary.withValues(alpha: opacity),
+                      gradient: RadialGradient(
+                        center: const Alignment(0.7, -0.6),
+                        radius: 1.2,
+                        colors: [
+                          gradientAccent,
+                          c.bgPrimary.withValues(alpha: opacity),
+                        ],
+                      ),
+                    ),
+                    child: ListenableBuilder(
+                      listenable: _controller,
+                      builder: (context, _) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _Header(
+                              controller: _controller,
+                              onSettingsSaved: _refreshVisualSettings,
+                            ),
+                            Expanded(
+                              child: _controller.hasResult
+                                  ? _ResultScreen(controller: _controller)
+                                  : _PickerScreen(controller: _controller),
+                            ),
+                            _FooterStatusBar(controller: _controller),
+                          ],
+                        );
+                      },
                     ),
                   ),
-                  child: ListenableBuilder(
-                    listenable: _controller,
-                    builder: (context, _) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _Header(
-                            controller: _controller,
-                            onSettingsSaved: _refreshVisualSettings,
-                          ),
-                          Expanded(
-                            child: _controller.hasResult
-                                ? _ResultScreen(controller: _controller)
-                                : _PickerScreen(controller: _controller),
-                          ),
-                          _FooterStatusBar(controller: _controller),
-                        ],
-                      );
-                    },
-                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -211,6 +220,10 @@ class _Header extends StatelessWidget {
           if (controller.hasResult &&
               controller.mode != CompareMode.folders) ...[
             _ExportButton(controller: controller),
+            const SizedBox(width: 4),
+          ],
+          if (BuildInfo.isDebug) ...[
+            const _DebugStamp(),
             const SizedBox(width: 4),
           ],
           _LanguageButton(color: c.textSecondary),
@@ -388,6 +401,33 @@ class _LanguageButton extends StatelessWidget {
       label: Text(
         context.languageProvider.badge,
         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+class _DebugStamp extends StatelessWidget {
+  const _DebugStamp();
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: 'Debug build timestamp: ${BuildInfo.debugTimestamp}',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: Colors.amber.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.amber.withValues(alpha: 0.5)),
+        ),
+        child: Text(
+          'DEBUG • v${BuildInfo.version} (${BuildInfo.debugTimestamp})',
+          style: const TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            color: Colors.amber,
+          ),
+        ),
       ),
     );
   }
@@ -657,7 +697,7 @@ class _FolderPickerPaneState extends State<_FolderPickerPane> {
       onDragExited: (_) => setState(() => _dragHover = false),
       onDragDone: (detail) {
         setState(() => _dragHover = false);
-        if (detail.files.isNotEmpty) {
+        if (detail.files.length == 1) {
           final path = detail.files.first.path;
           widget.controller.loadDirectory(widget.side, path);
         }
@@ -934,7 +974,7 @@ class _DocumentPickerPaneState extends State<_DocumentPickerPane> {
       onDragExited: (_) => setState(() => _dragHover = false),
       onDragDone: (details) {
         setState(() => _dragHover = false);
-        if (details.files.isNotEmpty) {
+        if (details.files.length == 1) {
           widget.controller.loadFile(widget.side, details.files.first.path);
         }
       },

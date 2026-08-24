@@ -3,7 +3,7 @@ library;
 
 const String appId = 'ja_compare';
 const String appName = 'JA Compare';
-const String appVersion = '2.0.1'; // Bump this before every release
+const String appVersion = '2.0.2'; // Bump this before every release
 const String appWebsite = 'https://jatechvn.github.io/';
 const String appGithub = 'https://github.com/jatechvn/JA_Compare';
 

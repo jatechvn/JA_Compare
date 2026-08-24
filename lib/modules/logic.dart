@@ -168,6 +168,70 @@ class CompareController extends ChangeNotifier {
     }
   }
 
+  /// Loads a pair dropped anywhere in the app and selects the matching mode.
+  /// A pair must contain two files or two directories; mixed pairs are not
+  /// comparable in one operation.
+  Future<void> loadDroppedPair(Iterable<String> rawPaths) async {
+    final paths = rawPaths
+        .where((path) => path.trim().isNotEmpty)
+        .toSet()
+        .toList();
+    if (paths.length != 2) {
+      errorMessage = 'Hãy thả đúng 2 tệp hoặc 2 thư mục để so sánh';
+      notifyListeners();
+      return;
+    }
+
+    final types = paths
+        .map((path) => FileSystemEntity.typeSync(path, followLinks: false))
+        .toList();
+    final areFiles = types.every((type) => type == FileSystemEntityType.file);
+    final areDirectories = types.every(
+      (type) => type == FileSystemEntityType.directory,
+    );
+    if (!areFiles && !areDirectories) {
+      errorMessage = 'Hãy thả 2 tệp hoặc 2 thư mục cùng loại';
+      notifyListeners();
+      return;
+    }
+
+    if (areFiles) {
+      if (mode != CompareMode.files) setMode(CompareMode.files);
+      await _loadDroppedFilePair(paths);
+      return;
+    }
+
+    if (mode != CompareMode.folders) setMode(CompareMode.folders);
+    _invalidatePendingCompare();
+    errorMessage = null;
+    leftDirectoryPath = paths[0];
+    rightDirectoryPath = paths[1];
+    directoryResult = null;
+    activeDrillDownPair = null;
+    notifyListeners();
+  }
+
+  Future<void> _loadDroppedFilePair(List<String> paths) async {
+    _invalidatePendingCompare();
+    errorMessage = null;
+    isLoading = true;
+    notifyListeners();
+    try {
+      final documents = await Future.wait(
+        paths.map((path) => _fileService.loadDocument(path)),
+      );
+      leftDocument = documents[0];
+      rightDocument = documents[1];
+      diffResult = null;
+    } catch (e) {
+      _logger.warning('Failed to load dropped file pair: $e');
+      errorMessage = e.toString();
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // --- Directory actions ---
   Future<void> pickDirectory(ComparePaneSide side) async {
     final path = await _fileService.pickDirectory();
