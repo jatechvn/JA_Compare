@@ -114,6 +114,21 @@ class _HistoryTile extends StatelessWidget {
           ),
           child: Row(
             children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: c.accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Icon(
+                  entry.isFolder
+                      ? Icons.folder_copy_rounded
+                      : Icons.insert_drive_file_outlined,
+                  size: 16,
+                  color: c.accent,
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

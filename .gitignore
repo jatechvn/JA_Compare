@@ -16,7 +16,9 @@ linux/flutter/ephemeral/
 # Release packaging output
 dist/
 dist_pack/
+backup/
 .Release.lnk
+.Release - Shortcut.lnk
 
 # Logs and temporary files
 logs/
@@ -35,12 +37,15 @@ docs/*
 .idea/
 .DS_Store
 Thumbs.db
-.claude/
 
 # Generated files
 *.g.dart
 *.freezed.dart
+.flutter-plugins-dependencies
+*.iml
 
 # Personal config and comparison history — user-specific runtime data
 config.json
+config.ini
 history.json
+.ja_compare_data/

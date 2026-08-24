@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'styles_win10.dart';
 import 'styles_win11.dart';
@@ -19,6 +20,11 @@ class AppColors {
   final Color diffAdded;
   final Color diffRemoved;
   final Color diffModified;
+  final Color diffWordAdded;
+  final Color diffWordRemoved;
+  final Color diffWordModified;
+  final Color cardHoverBg;
+  final Color accentGlow;
 
   const AppColors({
     required this.bgPrimary,
@@ -32,6 +38,11 @@ class AppColors {
     required this.diffAdded,
     required this.diffRemoved,
     required this.diffModified,
+    required this.diffWordAdded,
+    required this.diffWordRemoved,
+    required this.diffWordModified,
+    required this.cardHoverBg,
+    required this.accentGlow,
   });
 }
 
@@ -50,6 +61,8 @@ class ThemePalette {
 /// toggles it via [toggleTheme], which overrides the system default for
 /// the rest of this session only; the next launch re-syncs from Windows.
 class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
+  static const _themeChannel = MethodChannel('ja_compare/theme');
+
   late bool isDark;
   bool _followSystem = true;
   bool _isWin11 = true;
@@ -64,10 +77,18 @@ class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
       WidgetsBinding.instance.platformDispatcher.platformBrightness ==
       Brightness.dark;
 
+  void _syncNativeTheme() {
+    if (!Platform.isWindows) return;
+    try {
+      _themeChannel.invokeMethod<void>('setTheme', {'isDark': isDark});
+    } catch (_) {}
+  }
+
   @override
   void didChangePlatformBrightness() {
     if (!_followSystem) return;
     isDark = _systemIsDark();
+    _syncNativeTheme();
     notifyListeners();
   }
 
@@ -99,6 +120,7 @@ class ThemeProvider extends ChangeNotifier with WidgetsBindingObserver {
   void toggleTheme() {
     _followSystem = false;
     isDark = !isDark;
+    _syncNativeTheme();
     notifyListeners();
   }
 

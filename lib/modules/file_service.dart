@@ -51,6 +51,15 @@ class FileService {
     return result?.files.single.path;
   }
 
+  /// Opens the native directory picker.
+  /// Returns null if the user cancels.
+  Future<String?> pickDirectory() async {
+    final path = await FilePicker.getDirectoryPath(
+      dialogTitle: 'Chọn thư mục để so sánh',
+    );
+    return path;
+  }
+
   /// Reads and extracts a document at [path] into comparable lines,
   /// dispatching to the extractor matching its extension.
   Future<LoadedDocument> loadDocument(String path) async {

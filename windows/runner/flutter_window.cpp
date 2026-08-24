@@ -1,8 +1,11 @@
 #include "flutter_window.h"
 
+#include <flutter/standard_method_codec.h>
 #include <optional>
 
 #include "flutter/generated_plugin_registrant.h"
+#include "theme_win10.h"
+#include "theme_win11.h"
 
 FlutterWindow::FlutterWindow(const flutter::DartProject& project)
     : project_(project) {}
@@ -27,6 +30,38 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
+  // Setup theme sync MethodChannel for runtime theme switching from Dart
+  theme_channel_ =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(), "ja_compare/theme",
+          &flutter::StandardMethodCodec::GetInstance());
+
+  HWND hwnd = GetHandle();
+  theme_channel_->SetMethodCallHandler(
+      [hwnd](const flutter::MethodCall<flutter::EncodableValue>& call,
+             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>>
+                 result) {
+        if (call.method_name() == "setTheme") {
+          const auto* args =
+              std::get_if<flutter::EncodableMap>(call.arguments());
+          if (args) {
+            auto is_dark_it = args->find(flutter::EncodableValue("isDark"));
+            if (is_dark_it != args->end() &&
+                std::holds_alternative<bool>(is_dark_it->second)) {
+              bool is_dark = std::get<bool>(is_dark_it->second);
+              if (IsWindows11OrGreater()) {
+                ApplyThemeWin11(hwnd, is_dark, false);
+              } else {
+                ApplyThemeWin10(hwnd, is_dark);
+              }
+              result->Success();
+              return;
+            }
+          }
+        }
+        result->NotImplemented();
+      });
+
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
@@ -43,6 +78,10 @@ void FlutterWindow::OnDestroy() {
   HWND hwnd = GetHandle();
   if (hwnd != nullptr) {
     ::RemovePropW(hwnd, L"JA_COMPARE_INSTANCE");
+  }
+
+  if (theme_channel_) {
+    theme_channel_ = nullptr;
   }
 
   if (flutter_controller_) {

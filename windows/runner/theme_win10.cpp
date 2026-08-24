@@ -39,16 +39,18 @@ void ApplyThemeWin10(HWND hwnd, bool is_dark) {
   MARGINS margins = {0, 0, 1, 0};
   DwmExtendFrameIntoClientArea(hwnd, &margins);
 
-  // Force a repaint so the frame-extension change actually takes effect.
-  RECT rect;
-  GetWindowRect(hwnd, &rect);
-  SetWindowPos(hwnd, nullptr, 0, 0, (rect.right - rect.left) - 1,
-               (rect.bottom - rect.top),
-               SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
-  SetWindowPos(hwnd, nullptr, 0, 0, (rect.right - rect.left),
-               (rect.bottom - rect.top),
-               SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+  // Only trigger frame resize repaint if the window is currently visible
+  if (IsWindowVisible(hwnd)) {
+    RECT rect;
+    GetWindowRect(hwnd, &rect);
+    SetWindowPos(hwnd, nullptr, 0, 0, (rect.right - rect.left) - 1,
+                 (rect.bottom - rect.top),
+                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+    SetWindowPos(hwnd, nullptr, 0, 0, (rect.right - rect.left),
+                 (rect.bottom - rect.top),
+                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 
-  SendMessage(hwnd, WM_NCACTIVATE, FALSE, 0);
-  SendMessage(hwnd, WM_NCACTIVATE, TRUE, 0);
+    SendMessage(hwnd, WM_NCACTIVATE, FALSE, 0);
+    SendMessage(hwnd, WM_NCACTIVATE, TRUE, 0);
+  }
 }

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
+import 'app_storage_service.dart';
 
 /// Reads and writes app preferences from a simple section-based
 /// `config.ini` — glassmorphism blur/opacity (`[glassmorphism]`) and the
@@ -18,8 +18,10 @@ class SettingsService {
   };
   static const String _defaultLanguageCode = 'vi';
 
-  static File get _configFile =>
-      File(p.join(Directory.current.path, 'config.ini'));
+  static File get _configFile => AppStorageService.file('config.ini');
+
+  static Map<String, double> get defaultSettings =>
+      Map<String, double>.from(_glassDefaults);
 
   /// Parses `config.ini` into `{section: {key: value}}`. Keys that appear
   /// before any `[section]` header are dropped (the file always starts
@@ -60,7 +62,12 @@ class SettingsService {
       }
       buffer.writeln();
     }
-    _configFile.writeAsStringSync(buffer.toString());
+    try {
+      _configFile.writeAsStringSync(buffer.toString());
+    } catch (_) {
+      // Settings are optional; keep the current session usable when the
+      // profile directory is temporarily unavailable or read-only.
+    }
   }
 
   /// Loads persisted glassmorphism settings, falling back to defaults for

@@ -148,8 +148,11 @@ class _SettingsDialogState extends State<SettingsDialog>
 
   void _resetToDefaults() {
     setState(() {
-      SettingsService.resetToDefaults();
-      _loadCurrent();
+      final defaults = SettingsService.defaultSettings;
+      _bgBlur = defaults['bg_blur']!;
+      _bgOpacity = defaults['bg_opacity']!;
+      _dialogBlur = defaults['dialog_blur']!;
+      _dialogOpacity = defaults['dialog_opacity']!;
     });
   }
 
@@ -160,7 +163,7 @@ class _SettingsDialogState extends State<SettingsDialog>
       'dialog_blur': _dialogBlur,
       'dialog_opacity': _dialogOpacity,
     });
-    Navigator.of(context).maybePop();
+    Navigator.of(context).pop(true);
   }
 
   @override
@@ -189,8 +192,8 @@ class _SettingsDialogState extends State<SettingsDialog>
             indicatorColor: c.accent,
             tabs: [
               Tab(text: context.tr('tab_advanced')),
-              Tab(text: context.tr('tab_guide')),
               Tab(text: context.tr('tab_about')),
+              Tab(text: context.tr('tab_guide')),
             ],
           ),
           Expanded(
@@ -198,8 +201,8 @@ class _SettingsDialogState extends State<SettingsDialog>
               controller: _tabController,
               children: [
                 _buildAdvancedTab(c),
-                _buildGuideTab(c),
                 _buildAboutTab(c),
+                _buildGuideTab(c),
               ],
             ),
           ),
@@ -381,6 +384,25 @@ class _SettingsDialogState extends State<SettingsDialog>
                 const SizedBox(width: 4),
                 Text(
                   '${context.tr('website_label')}: ${appWebsite.replaceFirst('https://', '')}',
+                  style: TextStyle(
+                    color: c.accent,
+                    fontSize: 12,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          InkWell(
+            onTap: () => launchUrl(Uri.parse(appGithub)),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.code, size: 14, color: c.accent),
+                const SizedBox(width: 4),
+                Text(
+                  '${context.tr('github_label')}: ${appGithub.replaceFirst('https://', '')}',
                   style: TextStyle(
                     color: c.accent,
                     fontSize: 12,

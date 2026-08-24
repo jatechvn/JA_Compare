@@ -14,6 +14,17 @@ enum DiffType {
   modify,
 }
 
+/// Intra-line diff segment type for word/character level highlighting.
+enum DiffSegmentType { equal, insert, delete }
+
+/// A slice of text inside a modified line with granular diff classification.
+class DiffSegment {
+  final DiffSegmentType type;
+  final String text;
+
+  const DiffSegment(this.type, this.text);
+}
+
 /// One row of the diff view. `leftText`/`rightText` are null when that side
 /// has no counterpart for this row (pure insert/delete).
 class DiffLine {
@@ -22,6 +33,8 @@ class DiffLine {
   final String? rightText;
   final int? leftLineNo;
   final int? rightLineNo;
+  final List<DiffSegment>? leftSegments;
+  final List<DiffSegment>? rightSegments;
 
   const DiffLine({
     required this.type,
@@ -29,7 +42,34 @@ class DiffLine {
     this.rightText,
     this.leftLineNo,
     this.rightLineNo,
+    this.leftSegments,
+    this.rightSegments,
   });
+}
+
+/// Comparison configuration options.
+class DiffOptions {
+  final bool ignoreWhitespace;
+  final bool ignoreCase;
+  final bool ignoreEmptyLines;
+
+  const DiffOptions({
+    this.ignoreWhitespace = false,
+    this.ignoreCase = false,
+    this.ignoreEmptyLines = false,
+  });
+
+  DiffOptions copyWith({
+    bool? ignoreWhitespace,
+    bool? ignoreCase,
+    bool? ignoreEmptyLines,
+  }) {
+    return DiffOptions(
+      ignoreWhitespace: ignoreWhitespace ?? this.ignoreWhitespace,
+      ignoreCase: ignoreCase ?? this.ignoreCase,
+      ignoreEmptyLines: ignoreEmptyLines ?? this.ignoreEmptyLines,
+    );
+  }
 }
 
 /// Aggregate counts shown in the comparison summary bar.

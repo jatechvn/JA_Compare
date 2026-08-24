@@ -8,6 +8,7 @@ class HistoryEntry {
   final int added;
   final int removed;
   final int modified;
+  final bool isFolder;
 
   const HistoryEntry({
     required this.leftPath,
@@ -18,6 +19,7 @@ class HistoryEntry {
     required this.added,
     required this.removed,
     required this.modified,
+    this.isFolder = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -29,6 +31,7 @@ class HistoryEntry {
     'added': added,
     'removed': removed,
     'modified': modified,
+    'isFolder': isFolder,
   };
 
   factory HistoryEntry.fromJson(Map<String, dynamic> json) => HistoryEntry(
@@ -40,5 +43,6 @@ class HistoryEntry {
     added: json['added'] as int,
     removed: json['removed'] as int,
     modified: json['modified'] as int,
+    isFolder: json['isFolder'] as bool? ?? false,
   );
 }

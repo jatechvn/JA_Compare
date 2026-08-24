@@ -3,8 +3,9 @@ library;
 
 const String appId = 'ja_compare';
 const String appName = 'JA Compare';
-const String appVersion = '1.0.0'; // Bump this before every release
+const String appVersion = '2.0.1'; // Bump this before every release
 const String appWebsite = 'https://jatechvn.github.io/';
+const String appGithub = 'https://github.com/jatechvn/JA_Compare';
 
 /// File extensions recognized by each document extractor.
 const List<String> textLikeExtensions = [
@@ -22,7 +23,7 @@ const List<String> textLikeExtensions = [
   'dart',
 ];
 const List<String> docxExtensions = ['docx'];
-const List<String> xlsxExtensions = ['xlsx', 'xls'];
+const List<String> xlsxExtensions = ['xlsx'];
 const List<String> pdfExtensions = ['pdf'];
 
 /// All extensions accepted by the file picker, flattened.

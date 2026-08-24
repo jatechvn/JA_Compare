@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
-
 import '../models/history_entry.dart';
+import 'app_storage_service.dart';
 
 /// Persists the list of past comparisons to `history.json` (most recent
 /// first), capped at [maxEntries] so the file can't grow unbounded.
@@ -12,8 +11,7 @@ class HistoryService {
 
   static const int maxEntries = 50;
 
-  static File get _historyFile =>
-      File(p.join(Directory.current.path, 'history.json'));
+  static File get _historyFile => AppStorageService.file('history.json');
 
   static List<HistoryEntry> load() {
     final file = _historyFile;
@@ -28,12 +26,15 @@ class HistoryService {
     }
   }
 
-  /// Records a comparison, moving it to the front if the same file pair
-  /// was already recorded.
+  /// Records a file or folder comparison, moving it to the front if the same
+  /// pair and comparison type was already recorded.
   static void add(HistoryEntry entry) {
     final list = load()
       ..removeWhere(
-        (e) => e.leftPath == entry.leftPath && e.rightPath == entry.rightPath,
+        (e) =>
+            e.leftPath == entry.leftPath &&
+            e.rightPath == entry.rightPath &&
+            e.isFolder == entry.isFolder,
       )
       ..insert(0, entry);
     if (list.length > maxEntries) list.removeRange(maxEntries, list.length);
@@ -46,18 +47,23 @@ class HistoryService {
         (e) =>
             e.leftPath == entry.leftPath &&
             e.rightPath == entry.rightPath &&
+            e.isFolder == entry.isFolder &&
             e.comparedAt == entry.comparedAt,
       );
     _save(list);
   }
 
   static void clear() {
-    if (_historyFile.existsSync()) _historyFile.deleteSync();
+    try {
+      if (_historyFile.existsSync()) _historyFile.deleteSync();
+    } catch (_) {}
   }
 
   static void _save(List<HistoryEntry> list) {
-    _historyFile.writeAsStringSync(
-      jsonEncode(list.map((e) => e.toJson()).toList()),
-    );
+    try {
+      _historyFile.writeAsStringSync(
+        jsonEncode(list.map((e) => e.toJson()).toList()),
+      );
+    } catch (_) {}
   }
 }

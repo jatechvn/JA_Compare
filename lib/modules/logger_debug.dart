@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as p;
 
+import 'services/app_storage_service.dart';
+
 IOSink? _debugLogSink;
 
 void setupDebugLogger() {
   Logger.root.level = Level.ALL;
-  final logDir = Directory(p.join(Directory.current.path, 'logs'));
+  final logDir = AppStorageService.logsDirectory;
   if (!logDir.existsSync()) logDir.createSync(recursive: true);
 
   final now = DateTime.now();

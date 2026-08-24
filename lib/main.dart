@@ -5,6 +5,7 @@ import 'modules/build_info.dart';
 import 'modules/constants.dart';
 import 'modules/i18n/language_provider.dart';
 import 'modules/logger_config.dart';
+import 'modules/services/app_storage_service.dart';
 import 'modules/ui/language_scope.dart';
 import 'modules/ui/main_window.dart';
 import 'modules/ui/styles.dart';
@@ -17,6 +18,7 @@ Future<void> main(List<String> args) async {
   }
 
   WidgetsFlutterBinding.ensureInitialized();
+  AppStorageService.ensureInitialized();
   setupLogger();
 
   await windowManager.ensureInitialized();
@@ -30,7 +32,6 @@ Future<void> main(List<String> args) async {
   const windowOptions = WindowOptions(
     size: Size(1180, 820),
     minimumSize: Size(860, 560),
-    title: appName,
   );
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.setPreventClose(false);

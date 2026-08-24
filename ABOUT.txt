@@ -2,11 +2,12 @@
                        PROJECT INFORMATION CARD
 ========================================================================
 Project Name : JA Compare
-Tech Stack   : Flutter 3.x / Dart 3.x
+Version      : 2.0.1
+Tech Stack   : Flutter / Dart (Windows Desktop)
 Managed By   : JA Auto Git
 Website      : https://jatechvn.github.io/
 ------------------------------------------------------------------------
-Description  : Windows desktop app that compares two documents (Text,
-Markdown, CSV, JSON, Word, Excel, PDF) and highlights their differences
-side by side.
+Description  : Windows-first document and folder comparison tool with
+synchronized diff views, multi-format extraction, comparison history,
+and Markdown/Excel export.
 ========================================================================

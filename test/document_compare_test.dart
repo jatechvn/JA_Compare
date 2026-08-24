@@ -13,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import 'package:ja_compare/modules/diff_engine.dart';
+import 'package:ja_compare/modules/constants.dart';
+import 'package:ja_compare/modules/extractors/text_extractor.dart';
 import 'package:ja_compare/modules/file_service.dart';
 import 'package:ja_compare/modules/models/diff_result.dart';
 
@@ -99,6 +101,32 @@ void main() {
 
     expect(result.stats.modified, 1); // An's score changed
     expect(result.stats.added, 1); // Chi row added
+  });
+
+  test('does not advertise or load legacy binary .xls', () async {
+    expect(supportedExtensions, isNot(contains('xls')));
+    final legacyXls = File('${tempDir.path}/legacy.xls')
+      ..writeAsBytesSync([0xD0, 0xCF, 0x11, 0xE0]);
+
+    expect(
+      () => service.loadDocument(legacyXls.path),
+      throwsA(isA<UnsupportedFileTypeException>()),
+    );
+  });
+
+  test('Text extractor reads UTF-16 LE files with a BOM', () {
+    final text = 'Dòng một\nDòng hai';
+    final units = <int>[0xFF, 0xFE];
+    for (final unit in text.codeUnits) {
+      units
+        ..add(unit & 0xFF)
+        ..add(unit >> 8);
+    }
+
+    expect(extractTextLines(Uint8List.fromList(units)), [
+      'Dòng một',
+      'Dòng hai',
+    ]);
   });
 
   test('PDF (.pdf): extracted-text diff', () async {

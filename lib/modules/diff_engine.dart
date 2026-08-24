@@ -7,41 +7,43 @@ import 'models/diff_result.dart';
 /// document pair doesn't block the UI thread while diffing.
 Future<DiffResult> computeDiffInBackground(
   List<String> leftLines,
-  List<String> rightLines,
-) {
-  return compute(_computeDiffEntry, (leftLines, rightLines));
+  List<String> rightLines, {
+  DiffOptions options = const DiffOptions(),
+}) {
+  return compute(_computeDiffEntry, (leftLines, rightLines, options));
 }
 
-DiffResult _computeDiffEntry((List<String>, List<String>) args) =>
-    computeDiff(args.$1, args.$2);
+DiffResult _computeDiffEntry((List<String>, List<String>, DiffOptions) args) =>
+    computeDiff(args.$1, args.$2, options: args.$3);
 
-/// Maps each distinct line of text to a single opaque UTF-16 code unit so
-/// the character-oriented [diff] algorithm can be reused to diff whole
-/// lines instead of characters — the classic "diff on lines" technique.
-/// Surrogate-pair code units (0xD800-0xDFFF) are skipped since they cannot
-/// stand alone in a String; this leaves ~63.7k distinct lines addressable,
-/// far beyond what a real document comparison needs.
+String _normalizeLine(String line, DiffOptions options) {
+  var s = line;
+  if (options.ignoreWhitespace) {
+    s = s.trim().replaceAll(RegExp(r'\s+'), ' ');
+  }
+  if (options.ignoreCase) {
+    s = s.toLowerCase();
+  }
+  return s;
+}
+
 class _LineTokenizer {
-  final Map<String, int> _lineIndex = {};
-  final List<String> _lines = [];
-  final Map<int, String> _codeUnitToLine = {};
+  final Map<String, int> _normToIndex = {};
+  int _nextIndex = 0;
 
-  String tokenize(List<String> input) {
+  String tokenize(List<String> input, DiffOptions options) {
     final buffer = StringBuffer();
     for (final line in input) {
-      var index = _lineIndex[line];
+      final norm = _normalizeLine(line, options);
+      var index = _normToIndex[norm];
       if (index == null) {
-        index = _lines.length;
-        _lines.add(line);
-        _lineIndex[line] = index;
-        _codeUnitToLine[_codeUnitForIndex(index)] = line;
+        index = _nextIndex++;
+        _normToIndex[norm] = index;
       }
       buffer.writeCharCode(_codeUnitForIndex(index));
     }
     return buffer.toString();
   }
-
-  String lineForCodeUnit(int codeUnit) => _codeUnitToLine[codeUnit]!;
 
   static int _codeUnitForIndex(int index) {
     const start = 0x0021; // skip C0 control range
@@ -53,37 +55,85 @@ class _LineTokenizer {
 
 class _RawLine {
   final DiffType type;
-  final String text;
-  const _RawLine(this.type, this.text);
+  final String leftText;
+  final String? rightText;
+  const _RawLine(this.type, this.leftText, {this.rightText});
 }
 
-/// Runs a line-level diff between [leftLines] and [rightLines] and returns
-/// a [DiffResult] ready for the side-by-side view. Adjacent delete/insert
-/// runs are paired up row-by-row as [DiffType.modify] so changed lines show
-/// up on the same row in both panes instead of as a delete block followed
-/// by an unrelated insert block.
-DiffResult computeDiff(List<String> leftLines, List<String> rightLines) {
-  final tokenizer = _LineTokenizer();
-  final encodedLeft = tokenizer.tokenize(leftLines);
-  final encodedRight = tokenizer.tokenize(rightLines);
+(List<DiffSegment>, List<DiffSegment>) _computeIntraLineSegments(
+  String left,
+  String right,
+) {
+  final dmp = diff(left, right, checklines: false);
+  cleanupSemantic(dmp);
 
-  // Deliberately no cleanupSemantic() here: it's designed to reshape
-  // character-level diffs for human readability, and applied to
-  // whole-line tokens it can absorb a genuinely-unchanged line sitting
-  // between two edits into the surrounding delete/insert run — which
-  // _buildResult below would then misreport as "modified" content that
-  // is actually identical on both sides.
+  final leftSegments = <DiffSegment>[];
+  final rightSegments = <DiffSegment>[];
+
+  for (final d in dmp) {
+    if (d.text.isEmpty) continue;
+    if (d.operation == DIFF_EQUAL) {
+      leftSegments.add(DiffSegment(DiffSegmentType.equal, d.text));
+      rightSegments.add(DiffSegment(DiffSegmentType.equal, d.text));
+    } else if (d.operation == DIFF_DELETE) {
+      leftSegments.add(DiffSegment(DiffSegmentType.delete, d.text));
+    } else if (d.operation == DIFF_INSERT) {
+      rightSegments.add(DiffSegment(DiffSegmentType.insert, d.text));
+    }
+  }
+
+  return (leftSegments, rightSegments);
+}
+
+/// Runs a line-level diff between [leftLines] and [rightLines] with optional [options]
+/// and returns a [DiffResult] with intra-line segments ready for the diff view.
+DiffResult computeDiff(
+  List<String> leftLines,
+  List<String> rightLines, {
+  DiffOptions options = const DiffOptions(),
+}) {
+  var effectiveLeft = leftLines;
+  var effectiveRight = rightLines;
+
+  if (options.ignoreEmptyLines) {
+    effectiveLeft = effectiveLeft.where((l) => l.trim().isNotEmpty).toList();
+    effectiveRight = effectiveRight.where((l) => l.trim().isNotEmpty).toList();
+  }
+
+  final tokenizer = _LineTokenizer();
+  final encodedLeft = tokenizer.tokenize(effectiveLeft, options);
+  final encodedRight = tokenizer.tokenize(effectiveRight, options);
+
   final rawDiffs = diff(encodedLeft, encodedRight, checklines: false);
 
+  var leftCursor = 0;
+  var rightCursor = 0;
   final flat = <_RawLine>[];
+
   for (final d in rawDiffs) {
-    final type = switch (d.operation) {
-      DIFF_INSERT => DiffType.insert,
-      DIFF_DELETE => DiffType.delete,
-      _ => DiffType.equal,
-    };
-    for (final codeUnit in d.text.codeUnits) {
-      flat.add(_RawLine(type, tokenizer.lineForCodeUnit(codeUnit)));
+    final len = d.text.length;
+    if (d.operation == DIFF_EQUAL) {
+      for (var k = 0; k < len; k++) {
+        flat.add(
+          _RawLine(
+            DiffType.equal,
+            effectiveLeft[leftCursor + k],
+            rightText: effectiveRight[rightCursor + k],
+          ),
+        );
+      }
+      leftCursor += len;
+      rightCursor += len;
+    } else if (d.operation == DIFF_DELETE) {
+      for (var k = 0; k < len; k++) {
+        flat.add(_RawLine(DiffType.delete, effectiveLeft[leftCursor + k]));
+      }
+      leftCursor += len;
+    } else if (d.operation == DIFF_INSERT) {
+      for (var k = 0; k < len; k++) {
+        flat.add(_RawLine(DiffType.insert, effectiveRight[rightCursor + k]));
+      }
+      rightCursor += len;
     }
   }
 
@@ -109,8 +159,8 @@ DiffResult _buildResult(List<_RawLine> flat) {
       lines.add(
         DiffLine(
           type: DiffType.equal,
-          leftText: current.text,
-          rightText: current.text,
+          leftText: current.leftText,
+          rightText: current.rightText ?? current.leftText,
           leftLineNo: leftNo,
           rightLineNo: rightNo,
         ),
@@ -123,9 +173,9 @@ DiffResult _buildResult(List<_RawLine> flat) {
     final inserts = <String>[];
     while (i < flat.length && flat[i].type != DiffType.equal) {
       if (flat[i].type == DiffType.delete) {
-        deletes.add(flat[i].text);
+        deletes.add(flat[i].leftText);
       } else {
-        inserts.add(flat[i].text);
+        inserts.add(flat[i].leftText); // holds the insert text
       }
       i++;
     }
@@ -136,24 +186,36 @@ DiffResult _buildResult(List<_RawLine> flat) {
     for (var k = 0; k < pairCount; k++) {
       leftNo++;
       rightNo++;
-      // Defensive: a paired delete/insert should differ by construction,
-      // but if the algorithm ever emits identical text on both sides,
-      // report it as unchanged rather than a misleading "modified" row.
       final isActuallyEqual = deletes[k] == inserts[k];
       if (isActuallyEqual) {
         unchanged++;
+        lines.add(
+          DiffLine(
+            type: DiffType.equal,
+            leftText: deletes[k],
+            rightText: inserts[k],
+            leftLineNo: leftNo,
+            rightLineNo: rightNo,
+          ),
+        );
       } else {
         modified++;
+        final (leftSegs, rightSegs) = _computeIntraLineSegments(
+          deletes[k],
+          inserts[k],
+        );
+        lines.add(
+          DiffLine(
+            type: DiffType.modify,
+            leftText: deletes[k],
+            rightText: inserts[k],
+            leftLineNo: leftNo,
+            rightLineNo: rightNo,
+            leftSegments: leftSegs,
+            rightSegments: rightSegs,
+          ),
+        );
       }
-      lines.add(
-        DiffLine(
-          type: isActuallyEqual ? DiffType.equal : DiffType.modify,
-          leftText: deletes[k],
-          rightText: inserts[k],
-          leftLineNo: leftNo,
-          rightLineNo: rightNo,
-        ),
-      );
     }
     for (var k = pairCount; k < deletes.length; k++) {
       leftNo++;
